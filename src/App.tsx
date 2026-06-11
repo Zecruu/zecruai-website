@@ -34,7 +34,7 @@ import {
   type Platform,
 } from './download';
 
-type RouteName = 'home' | 'getting-started' | 'faq';
+export type RouteName = 'home' | 'getting-started' | 'faq' | 'not-found';
 
 const githubRepoUrl = 'https://github.com/Zecruu/ZecruAgentsHive';
 const releasesUrl = 'https://github.com/Zecruu/ZecruAgentsHive/releases/latest';
@@ -164,16 +164,22 @@ const screenshotSlots = [
   },
 ];
 
-function currentRoute(): RouteName {
-  const path = window.location.pathname.toLowerCase();
+export function currentRouteFromPath(pathname: string): RouteName {
+  const path = pathname.toLowerCase();
+  if (path.endsWith('/404.html')) return 'not-found';
   if (path.includes('/getting-started')) return 'getting-started';
   if (path.includes('/faq')) return 'faq';
   return 'home';
 }
 
+function currentRoute(): RouteName {
+  if (typeof window === 'undefined') return 'home';
+  return currentRouteFromPath(window.location.pathname);
+}
+
 function routeHref(current: RouteName, target: RouteName): string {
   if (target === current) return '#top';
-  const prefix = current === 'home' ? './' : '../';
+  const prefix = current === 'home' || current === 'not-found' ? './' : '../';
   if (target === 'home') return prefix;
   return `${prefix}${target}/`;
 }
@@ -183,15 +189,19 @@ function useDownloadLink(): {
   loading: boolean;
   fromCache: boolean;
 } {
-  const platform = useMemo<Platform>(() => detectPlatform(window.navigator.userAgent), []);
-  const [release, setRelease] = useState<GitHubRelease | null>(() =>
-    readCachedRelease(window.sessionStorage),
-  );
-  const [loading, setLoading] = useState(!release);
-  const [fromCache, setFromCache] = useState(Boolean(release));
+  const [platform, setPlatform] = useState<Platform>('other');
+  const [release, setRelease] = useState<GitHubRelease | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [fromCache, setFromCache] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
+    const cached = readCachedRelease(window.sessionStorage);
+    setPlatform(detectPlatform(window.navigator.userAgent));
+    if (cached) {
+      setRelease(cached);
+      setFromCache(true);
+    }
     setLoading(true);
 
     fetchLatestRelease(controller.signal)
@@ -672,6 +682,51 @@ function FAQPage({
   );
 }
 
+function NotFoundPage({
+  route,
+  link,
+  loading,
+}: {
+  route: RouteName;
+  link: DownloadLink;
+  loading: boolean;
+}) {
+  return (
+    <section id="top" className="px-5 py-20 sm:px-8">
+      <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_0.8fr] lg:items-center">
+        <div>
+          <p className="section-kicker">404</p>
+          <h1 className="mt-4 max-w-4xl text-5xl font-semibold leading-tight text-white sm:text-6xl">
+            This page is not in the mission plan.
+          </h1>
+          <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
+            The ZecruAI site is still small: home, getting started, FAQ, releases, and GitHub.
+          </p>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <a className="primary-button" href={routeHref(route, 'home')}>
+              <ArrowUpRight className="h-5 w-5" />
+              <span>Go home</span>
+            </a>
+            <a className="secondary-button" href={routeHref(route, 'getting-started')}>
+              <BookOpenCheck className="h-5 w-5" />
+              <span>Getting started</span>
+            </a>
+          </div>
+        </div>
+        <div className="rounded-lg border border-white/10 bg-panel p-6">
+          <h2 className="text-2xl font-semibold text-white">Looking for the app?</h2>
+          <p className="mt-3 text-sm leading-6 text-slate-400">
+            The latest desktop installer is still available from GitHub Releases.
+          </p>
+          <div className="mt-6">
+            <DownloadButtons link={link} loading={loading} />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function FinalCta({
   link,
   loading,
@@ -733,8 +788,8 @@ function Footer({ route }: { route: RouteName }) {
   );
 }
 
-function App() {
-  const route = currentRoute();
+function App({ initialRoute }: { initialRoute?: RouteName }) {
+  const route = useMemo(() => initialRoute ?? currentRoute(), [initialRoute]);
   const { link, loading, fromCache } = useDownloadLink();
 
   return (
@@ -744,8 +799,10 @@ function App() {
         <HomePage route={route} link={link} loading={loading} fromCache={fromCache} />
       ) : route === 'getting-started' ? (
         <GettingStartedPage route={route} link={link} loading={loading} />
-      ) : (
+      ) : route === 'faq' ? (
         <FAQPage route={route} link={link} loading={loading} />
+      ) : (
+        <NotFoundPage route={route} link={link} loading={loading} />
       )}
       <Footer route={route} />
     </main>

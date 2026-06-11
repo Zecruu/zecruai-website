@@ -13,6 +13,7 @@ export default defineConfig({
         main: page('./index.html'),
         gettingStarted: page('./getting-started/index.html'),
         faq: page('./faq/index.html'),
+        notFound: page('./404.html'),
       },
     },
   },
