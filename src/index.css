@@ -56,6 +56,38 @@ body {
     @apply rounded-md border border-white/10 bg-panel p-6 transition hover:border-mint/35 hover:bg-panelSoft;
   }
 
+  .pricing-card {
+    @apply rounded-md border border-white/10 bg-panel p-5;
+  }
+
+  .pricing-card h3 {
+    @apply mt-4 text-base font-semibold text-white;
+  }
+
+  .pricing-card p {
+    @apply mt-2 text-sm leading-6 text-slate-400;
+  }
+
+  .step-card {
+    @apply flex gap-4 rounded-md border border-white/10 bg-panel p-5;
+  }
+
+  .faq-item {
+    @apply rounded-md border border-white/10 bg-panel p-6;
+  }
+
+  .faq-item h2 {
+    @apply text-lg font-semibold text-white;
+  }
+
+  .faq-item p {
+    @apply mt-3 text-sm leading-6 text-slate-400;
+  }
+
+  .code-panel {
+    @apply rounded-md border border-white/10 bg-[#0b101b] p-4 font-mono text-sm leading-6 text-slate-200;
+  }
+
   .screenshot-slot {
     @apply rounded-md border border-white/10 bg-panel p-4;
   }
