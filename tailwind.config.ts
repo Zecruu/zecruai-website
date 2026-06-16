@@ -5,20 +5,23 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: '#080b12',
-        panel: '#101522',
-        panelSoft: '#151c2c',
-        line: '#263249',
-        mint: '#44d7b6',
-        amber: '#f4b860',
-        sky: '#68b7ff',
-        coral: '#ff7f70',
+        ink: '#27211d',
+        cream: '#f8f1e7',
+        paper: '#fffaf2',
+        panel: '#f3eadf',
+        panelSoft: '#fff7ed',
+        line: '#ddd0c1',
+        amber: '#c98a2e',
+        sky: '#687a52',
+        coral: '#bf6b4c',
+        charcoal: '#27211d',
+        clay: '#a85f3d',
       },
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui', 'Segoe UI', 'sans-serif'],
       },
       boxShadow: {
-        glow: '0 22px 80px rgba(68, 215, 182, 0.16)',
+        glow: '0 22px 80px rgba(168, 95, 61, 0.16)',
       },
     },
   },

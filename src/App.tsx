@@ -5,7 +5,6 @@ import {
   BrainCircuit,
   CheckCircle2,
   CircleHelp,
-  CloudDownload,
   Code2,
   Database,
   Download,
@@ -17,40 +16,34 @@ import {
   Laptop,
   ListChecks,
   LockKeyhole,
-  RefreshCcw,
   ShieldCheck,
-  Sparkles,
   TerminalSquare,
   Workflow,
 } from 'lucide-react';
 import {
-  detectPlatform,
   fetchLatestRelease,
   makeDownloadLink,
   readCachedRelease,
   writeCachedRelease,
-  type DownloadLink,
   type GitHubRelease,
-  type Platform,
 } from './download';
 
 export type RouteName = 'home' | 'getting-started' | 'faq' | 'not-found';
 
-const githubRepoUrl = 'https://github.com/Zecruu/ZecruAgentsHive';
-const releasesUrl = 'https://github.com/Zecruu/ZecruAgentsHive/releases/latest';
-const licenseUrl = 'https://github.com/Zecruu/ZecruAgentsHive/blob/main/LICENSE';
-const contactEmail = 'hello@zecruai.com';
+const githubRepoUrl = 'https://github.com/Zecruu/ZecruAI-Releases';
+const releasesUrl = 'https://github.com/Zecruu/ZecruAI-Releases/releases/latest';
+const contactEmail = 'mikedemchak135@gmail.com';
 
 const featureGroups = [
   {
     icon: Workflow,
     title: 'Planner and coder missions',
-    body: 'A planner turns a goal into scoped work, then coder agents implement and report back through the agent bus.',
+    body: 'A planner can break a project goal into scoped missions while coder agents implement, test, and report progress.',
   },
   {
     icon: GitBranch,
-    title: 'Worktree isolation',
-    body: 'Every agent works on its own branch. Review changes and merge from the app without mixing parallel work in one folder.',
+    title: 'Parallel local agents',
+    body: 'Run multiple agents against local project folders while keeping their work visible and reviewable.',
   },
   {
     icon: BookOpenCheck,
@@ -59,8 +52,8 @@ const featureGroups = [
   },
   {
     icon: BrainCircuit,
-    title: 'Project memory and distillation',
-    body: 'Durable project memory and mission distillation carry decisions, constraints, and learned context across long sessions.',
+    title: 'Project memory',
+    body: 'Durable notes and mission summaries help later work remember constraints, decisions, and product context.',
   },
   {
     icon: TerminalSquare,
@@ -69,8 +62,8 @@ const featureGroups = [
   },
   {
     icon: HardDrive,
-    title: 'Durable local config',
-    body: 'Project mappings and settings are stored locally with atomic writes and backup recovery for daily use.',
+    title: 'Cloud command center',
+    body: 'Use the web and mobile surfaces for relay, restart, activity, and needs-review decisions when you are away from the desktop.',
   },
 ];
 
@@ -78,7 +71,7 @@ const gettingStartedSteps = [
   {
     icon: Download,
     title: 'Download and install',
-    body: 'Use the smart download button for the latest Windows installer or macOS DMG from GitHub Releases.',
+    body: 'Use the Windows or macOS button for the latest public release from GitHub.',
   },
   {
     icon: TerminalSquare,
@@ -111,56 +104,44 @@ const requirements = [
   {
     icon: KeyRound,
     title: 'Provider access',
-    body: 'Use a Claude Code or Codex subscription, or any OpenAI-compatible API key you bring yourself.',
+    body: 'Use Claude Code, Codex-style workflows, or OpenAI-compatible API providers you connect.',
   },
 ];
 
 const faqs = [
   {
-    question: 'Is ZecruAI free?',
-    answer: 'Yes. The desktop app is free today.',
+    question: 'What is ZecruAI?',
+    answer:
+      'ZecruAI is a desktop AI agent workspace for coding and building software. It helps you coordinate planner and coder agents across real project work.',
   },
   {
-    question: 'Do you mark up tokens?',
+    question: 'How do downloads work?',
     answer:
-      'No. Your provider bill is your only bill. BYOK API keys stay local, and subscription auth stays in the CLI you use.',
+      'The Windows and macOS buttons resolve the latest public release automatically. If the lookup fails, they fall back to the GitHub latest-release page.',
   },
   {
-    question: 'What do I need?',
+    question: 'What model access do I need?',
     answer:
-      'A Windows or macOS machine, a project folder, and either Claude Code, Codex CLI, or an OpenAI-compatible API key.',
+      'Use the coding CLI, subscription, or API provider you choose. ZecruAI coordinates the workspace; model and provider usage is billed by your provider unless a plan explicitly says otherwise.',
   },
   {
     question: 'Which platforms are supported?',
-    answer: 'Windows and macOS today. Linux is not supported yet.',
+    answer: 'Windows and macOS downloads are available today. Linux is not supported yet.',
   },
   {
-    question: 'Is my code sent anywhere?',
+    question: 'What does the Cloud plan cover?',
     answer:
-      'Agents run locally. Only your chosen provider sees the prompts and code context that the agent sends to that provider.',
+      'Cloud features cover coordination, relay, history, mobile command center, activity, restart, and needs-review or plan-approval flows. They do not automatically include hosted model usage.',
   },
   {
-    question: "What's the catch?",
+    question: 'What project context can providers see?',
     answer:
-      'None today. Optional paid cloud conveniences may come later, but the local desktop app is free and provider access stays yours.',
-  },
-];
-
-const screenshotSlots = [
-  {
-    title: 'Mission canvas',
-    path: 'apps/website/public/screens/canvas.png',
-    note: 'Drop in the desktop mission/canvas view.',
+      'The product is designed around local project work and explicit provider connections. Your selected provider can receive the prompts and code context an agent sends for a task.',
   },
   {
-    title: 'Agent chat',
-    path: 'apps/website/public/screens/agent-chat.png',
-    note: 'Drop in an active planner/coder chat with usage visible.',
-  },
-  {
-    title: 'Project memory',
-    path: 'apps/website/public/screens/project-memory.png',
-    note: 'Drop in memory/distillation UI once captured.',
+    question: 'Can I coordinate multiple agents?',
+    answer:
+      'Yes. ZecruAI supports planner/coder coordination, progress reports, plan approvals, and multi-agent workflows for larger software tasks.',
   },
 ];
 
@@ -184,12 +165,11 @@ function routeHref(current: RouteName, target: RouteName): string {
   return `${prefix}${target}/`;
 }
 
-function useDownloadLink(): {
-  link: DownloadLink;
+function useLatestRelease(): {
+  release: GitHubRelease | null;
   loading: boolean;
   fromCache: boolean;
 } {
-  const [platform, setPlatform] = useState<Platform>('other');
   const [release, setRelease] = useState<GitHubRelease | null>(null);
   const [loading, setLoading] = useState(true);
   const [fromCache, setFromCache] = useState(false);
@@ -197,7 +177,6 @@ function useDownloadLink(): {
   useEffect(() => {
     const controller = new AbortController();
     const cached = readCachedRelease(window.sessionStorage);
-    setPlatform(detectPlatform(window.navigator.userAgent));
     if (cached) {
       setRelease(cached);
       setFromCache(true);
@@ -226,28 +205,30 @@ function useDownloadLink(): {
   }, []);
 
   return {
-    link: makeDownloadLink(release, platform),
+    release,
     loading,
     fromCache,
   };
 }
 
 function DownloadButtons({
-  link,
+  release,
   loading,
 }: {
-  link: DownloadLink;
+  release: GitHubRelease | null;
   loading: boolean;
 }) {
+  const windows = makeDownloadLink(release, 'windows');
+  const macos = makeDownloadLink(release, 'macos');
   return (
-    <div className="flex flex-col gap-3 sm:flex-row">
-      <a className="primary-button" href={link.href}>
+    <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+      <a className="primary-button w-full sm:w-auto" href={windows.href}>
         <Download className="h-5 w-5" />
-        <span>{loading ? 'Checking latest release...' : link.label}</span>
+        <span>{loading ? 'Checking Windows...' : windows.label}</span>
       </a>
-      <a className="secondary-button" href={releasesUrl}>
-        <CloudDownload className="h-5 w-5" />
-        <span>All releases</span>
+      <a className="secondary-button w-full sm:w-auto" href={macos.href}>
+        <Download className="h-5 w-5" />
+        <span>{loading ? 'Checking macOS...' : macos.label}</span>
       </a>
     </div>
   );
@@ -255,20 +236,20 @@ function DownloadButtons({
 
 function Header({ route }: { route: RouteName }) {
   return (
-    <header className="border-b border-white/10 bg-ink/92 backdrop-blur">
+    <header className="border-b border-line bg-cream/95 backdrop-blur">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
         <a href={routeHref(route, 'home')} className="flex items-center gap-3" aria-label="ZecruAI home">
           <img src={route === 'home' ? './icons/zecruai-icon-64.png' : '../icons/zecruai-icon-64.png'} alt="" className="h-9 w-9 rounded-md" />
           <span className="text-lg font-semibold">ZecruAI</span>
         </a>
-        <div className="flex items-center gap-2 text-sm text-slate-300">
+        <div className="flex items-center gap-2 text-sm text-stone-800">
           <a className="nav-link hidden sm:inline-flex" href={routeHref(route, 'getting-started')}>
             Getting started
           </a>
           <a className="nav-link hidden sm:inline-flex" href={routeHref(route, 'faq')}>
             FAQ
           </a>
-          <a className="icon-link" href={githubRepoUrl} aria-label="GitHub repository">
+          <a className="icon-link" href={githubRepoUrl} aria-label="GitHub releases repository">
             <Github className="h-5 w-5" />
           </a>
         </div>
@@ -279,86 +260,84 @@ function Header({ route }: { route: RouteName }) {
 
 function HomePage({
   route,
-  link,
+  release,
   loading,
   fromCache,
 }: {
   route: RouteName;
-  link: DownloadLink;
+  release: GitHubRelease | null;
   loading: boolean;
   fromCache: boolean;
 }) {
+  const releaseVersion = release ? release.tag_name.replace(/^v/i, '') : null;
   return (
     <>
-      <section id="top" className="relative border-b border-white/10">
+      <section id="top" className="relative border-b border-line">
         <div className="mx-auto grid max-w-7xl gap-10 px-5 py-14 sm:px-8 lg:grid-cols-[1.02fr_0.98fr] lg:py-20">
           <div className="flex flex-col justify-center">
-            <div className="mb-5 inline-flex w-fit items-center gap-2 rounded-md border border-mint/30 bg-mint/10 px-3 py-2 text-sm text-mint">
-              <Sparkles className="h-4 w-4" />
-              Free desktop app. Bring your own providers.
-            </div>
-            <h1 className="max-w-4xl text-5xl font-semibold leading-tight text-white sm:text-6xl lg:text-7xl">
-              ZecruAI orchestrates AI coding agents on your machine.
+            <h1 className="max-w-4xl text-5xl font-semibold leading-tight text-charcoal sm:text-6xl lg:text-7xl">
+              ZecruAI is the command center for AI coding agents.
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-              A planner agent runs coder agents on scoped missions, in parallel, using Claude Code,
-              Codex CLI, and OpenAI-compatible providers you control.
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-stone-800">
+              Coordinate planner and coder agents from a desktop workspace, route work across local
+              projects, and keep review decisions visible across desktop, web, and mobile.
             </p>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-slate-400">
-              ZecruAI is free. You bring your own subscriptions or API keys. We add zero provider
-              markup, so you are not paying a repriced middle layer for model access.
+            <p className="mt-4 max-w-2xl text-base leading-7 text-stone-700">
+              Use Claude Code, Codex-style workflows, or your own OpenAI-compatible providers.
+              ZecruAI Cloud covers coordination, relay, history, and mobile command-center
+              features; model usage stays with the provider you choose.
             </p>
             <div className="mt-8">
-              <DownloadButtons link={link} loading={loading} />
+              <DownloadButtons release={release} loading={loading} />
             </div>
-            <p className="mt-3 text-sm text-slate-500">
-              {link.isDirectAsset
-                ? `Direct ${link.platform === 'windows' ? '.exe' : '.dmg'} asset from GitHub Releases.`
-                : 'Unsupported platform or offline release lookup; GitHub Releases stays available.'}
+            <p className="mt-3 text-sm text-stone-600">
+              {releaseVersion
+                ? `Latest public release: ${releaseVersion}.`
+                : 'If live lookup is unavailable, both buttons open the latest-release page.'}
               {fromCache ? ' Version loaded from this browser session.' : ''}
             </p>
           </div>
 
-          <div className="relative min-h-[440px] rounded-lg border border-white/10 bg-panel p-4 shadow-glow">
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
-              <div className="flex items-center gap-2 text-sm text-slate-300">
+          <div className="relative min-h-[440px] rounded-lg border border-line bg-panel p-4 shadow-glow">
+            <div className="flex items-center justify-between border-b border-line pb-4">
+              <div className="flex items-center gap-2 text-sm text-stone-800">
                 <span className="h-3 w-3 rounded-full bg-coral" />
                 <span className="h-3 w-3 rounded-full bg-amber" />
-                <span className="h-3 w-3 rounded-full bg-mint" />
+                <span className="h-3 w-3 rounded-full bg-clay" />
               </div>
-              <span className="rounded-md bg-white/5 px-2 py-1 text-xs text-slate-400">
+              <span className="rounded-md bg-paper px-2 py-1 text-xs text-stone-700">
                 Mission control
               </span>
             </div>
             <div className="mt-5 grid gap-4">
-              <div className="rounded-md border border-mint/30 bg-mint/10 p-4">
-                <div className="mb-2 flex items-center gap-2 text-sm font-medium text-mint">
+              <div className="rounded-md border border-clay/30 bg-clay/10 p-4">
+                <div className="mb-2 flex items-center gap-2 text-sm font-medium text-clay">
                   <CheckCircle2 className="h-4 w-4" />
                   Planner
                 </div>
-                <p className="text-sm leading-6 text-slate-200">
+                <p className="text-sm leading-6 text-stone-800">
                   Split the work into parallel missions, put each agent on a branch, then review
                   and merge changes from the app.
                 </p>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-md border border-white/10 bg-panelSoft p-4">
+                <div className="rounded-md border border-line bg-panelSoft p-4">
                   <GitBranch className="mb-3 h-5 w-5 text-sky" />
-                  <h2 className="text-sm font-semibold text-white">Isolated branches</h2>
-                  <p className="mt-2 text-sm leading-6 text-slate-400">
+                  <h2 className="text-sm font-semibold text-charcoal">Isolated branches</h2>
+                  <p className="mt-2 text-sm leading-6 text-stone-700">
                     Agents do their work in separate worktrees so parallel edits stay reviewable.
                   </p>
                 </div>
-                <div className="rounded-md border border-white/10 bg-panelSoft p-4">
+                <div className="rounded-md border border-line bg-panelSoft p-4">
                   <Database className="mb-3 h-5 w-5 text-amber" />
-                  <h2 className="text-sm font-semibold text-white">Memory</h2>
-                  <p className="mt-2 text-sm leading-6 text-slate-400">
+                  <h2 className="text-sm font-semibold text-charcoal">Memory</h2>
+                  <p className="mt-2 text-sm leading-6 text-stone-700">
                     Durable project facts and mission summaries keep later turns grounded.
                   </p>
                 </div>
               </div>
-              <div className="rounded-md border border-white/10 bg-[#0b101b] p-4 font-mono text-sm text-slate-300">
-                <p className="text-mint">agent bus</p>
+              <div className="rounded-md border border-line bg-[#2f2924] p-4 font-mono text-sm text-[#fff7ed]">
+                <p className="text-amber">agent bus</p>
                 <p className="mt-2">planner -&gt; coder: build the getting-started page</p>
                 <p className="mt-1">coder -&gt; planner: tests green, branch pushed</p>
               </div>
@@ -370,15 +349,14 @@ function HomePage({
       <FeatureSection />
       <PricingSection />
       <MissionFlowSection route={route} />
-      <ScreenshotSection route={route} />
-      <FinalCta link={link} loading={loading} />
+      <FinalCta release={release} loading={loading} />
     </>
   );
 }
 
 function FeatureSection() {
   return (
-    <section id="features" className="border-b border-white/10 px-5 py-16 sm:px-8">
+    <section id="features" className="border-b border-line px-5 py-16 sm:px-8">
       <div className="mx-auto max-w-7xl">
         <div className="max-w-3xl">
           <p className="section-kicker">Why it exists</p>
@@ -391,9 +369,9 @@ function FeatureSection() {
         <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {featureGroups.map((feature) => (
             <article key={feature.title} className="feature-card">
-              <feature.icon className="h-6 w-6 text-mint" />
-              <h3 className="mt-5 text-lg font-semibold text-white">{feature.title}</h3>
-              <p className="mt-3 text-sm leading-6 text-slate-400">{feature.body}</p>
+              <feature.icon className="h-6 w-6 text-clay" />
+              <h3 className="mt-5 text-lg font-semibold text-charcoal">{feature.title}</h3>
+              <p className="mt-3 text-sm leading-6 text-stone-700">{feature.body}</p>
             </article>
           ))}
         </div>
@@ -404,32 +382,32 @@ function FeatureSection() {
 
 function PricingSection() {
   return (
-    <section className="border-b border-white/10 px-5 py-16 sm:px-8">
+    <section className="border-b border-line px-5 py-16 sm:px-8">
       <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[0.8fr_1.2fr]">
         <div>
-          <p className="section-kicker">Pricing advantage</p>
-          <h2 className="section-title">Free orchestration. Direct provider pricing.</h2>
+          <p className="section-kicker">Plans and providers</p>
+          <h2 className="section-title">Coordination from ZecruAI. Models from the providers you choose.</h2>
           <p className="section-copy">
-            Editor-subscription tools often resell model access through per-seat or per-token
-            pricing. ZecruAI is the coordination layer for the subscriptions and keys you already
-            have.
+            ZecruAI Cloud is for coordination, relay, history, mobile command-center access, and
+            review workflows. Model usage remains tied to your Claude, Codex, or API provider
+            account unless a plan explicitly says otherwise.
           </p>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
           <article className="pricing-card">
-            <ShieldCheck className="h-6 w-6 text-mint" />
-            <h3>Free app</h3>
-            <p>The desktop orchestrator is free today.</p>
+            <ShieldCheck className="h-6 w-6 text-clay" />
+            <h3>Desktop workspace</h3>
+            <p>Launch local agents, inspect progress, and review software changes from one place.</p>
           </article>
           <article className="pricing-card">
             <KeyRound className="h-6 w-6 text-sky" />
             <h3>Your provider</h3>
-            <p>Claude Code, Codex CLI, or BYO OpenAI-compatible API keys.</p>
+            <p>Connect the model subscription, coding CLI, or compatible API account you prefer.</p>
           </article>
           <article className="pricing-card">
             <Workflow className="h-6 w-6 text-amber" />
-            <h3>Parallel agents</h3>
-            <p>Run multiple agents without paying ZecruAI a model-access markup.</p>
+            <h3>Cloud command center</h3>
+            <p>Use relay, restart, activity, history, and plan approvals when you are away.</p>
           </article>
         </div>
       </div>
@@ -439,13 +417,13 @@ function PricingSection() {
 
 function MissionFlowSection({ route }: { route: RouteName }) {
   const steps = [
-    'A planner turns a goal into an executable mission.',
-    'Coder agents receive scoped work on isolated branches and report progress back through the bus.',
-    'Memory, repo maps, and mission summaries keep the next turn grounded.',
+    'Describe the software outcome you want and let a planner shape the work.',
+    'Send scoped missions to coder agents that can inspect, edit, test, and report.',
+    'Approve plans, restart stuck agents, and review activity from desktop, web, or mobile.',
   ];
 
   return (
-    <section className="border-b border-white/10 px-5 py-16 sm:px-8">
+    <section className="border-b border-line px-5 py-16 sm:px-8">
       <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.8fr_1.2fr]">
         <div>
           <p className="section-kicker">How missions flow</p>
@@ -456,48 +434,12 @@ function MissionFlowSection({ route }: { route: RouteName }) {
         </div>
         <div className="grid gap-4">
           {steps.map((step, index) => (
-            <div key={step} className="flex gap-4 rounded-md border border-white/10 bg-panel p-5">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-mint text-sm font-bold text-ink">
+            <div key={step} className="flex gap-4 rounded-md border border-line bg-panel p-5">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-clay text-sm font-bold text-paper">
                 {index + 1}
               </span>
-              <p className="pt-1 text-base leading-7 text-slate-300">{step}</p>
+              <p className="pt-1 text-base leading-7 text-stone-800">{step}</p>
             </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ScreenshotSection({ route }: { route: RouteName }) {
-  return (
-    <section id="screens" className="border-b border-white/10 px-5 py-16 sm:px-8">
-      <div className="mx-auto max-w-7xl">
-        <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
-          <div className="max-w-3xl">
-            <p className="section-kicker">Screenshots</p>
-            <h2 className="section-title">Real product shots belong here.</h2>
-            <p className="section-copy">
-              These slots intentionally show exact file paths. Replace them with real captures
-              from the desktop app before launch.
-            </p>
-          </div>
-          <a className="text-link" href={route === 'home' ? './screens/README.md' : '../screens/README.md'}>
-            Screenshot checklist <ArrowUpRight className="h-4 w-4" />
-          </a>
-        </div>
-        <div className="mt-10 grid gap-4 lg:grid-cols-3">
-          {screenshotSlots.map((slot) => (
-            <article key={slot.path} className="screenshot-slot">
-              <div className="flex h-44 items-center justify-center rounded-md border border-dashed border-white/20 bg-[#0b101b] p-5 text-center">
-                <div>
-                  <CircleHelp className="mx-auto mb-3 h-8 w-8 text-slate-500" />
-                  <p className="text-sm font-semibold text-slate-200">{slot.title}</p>
-                  <code className="mt-3 block break-all text-xs text-mint">{slot.path}</code>
-                </div>
-              </div>
-              <p className="mt-4 text-sm leading-6 text-slate-400">{slot.note}</p>
-            </article>
           ))}
         </div>
       </div>
@@ -507,76 +449,76 @@ function ScreenshotSection({ route }: { route: RouteName }) {
 
 function GettingStartedPage({
   route,
-  link,
+  release,
   loading,
 }: {
   route: RouteName;
-  link: DownloadLink;
+  release: GitHubRelease | null;
   loading: boolean;
 }) {
   return (
     <>
-      <section id="top" className="border-b border-white/10 px-5 py-16 sm:px-8">
+      <section id="top" className="border-b border-line px-5 py-16 sm:px-8">
         <div className="mx-auto max-w-7xl">
           <p className="section-kicker">Getting started</p>
           <div className="mt-4 grid gap-8 lg:grid-cols-[1fr_0.85fr] lg:items-end">
             <div>
-              <h1 className="max-w-4xl text-5xl font-semibold leading-tight text-white sm:text-6xl">
+              <h1 className="max-w-4xl text-5xl font-semibold leading-tight text-charcoal sm:text-6xl">
                 From download to your first agent.
               </h1>
-              <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-300">
+              <p className="mt-6 max-w-3xl text-lg leading-8 text-stone-800">
                 ZecruAI's first-run wizard mirrors the real path: install the app, connect Claude
                 Code or Codex CLI, pick a project folder, then launch your first coding agent.
               </p>
             </div>
-            <div className="rounded-lg border border-white/10 bg-panel p-5">
-              <DownloadButtons link={link} loading={loading} />
-              <p className="mt-4 text-sm leading-6 text-slate-400">
-                The button uses GitHub Releases and falls back to the releases page if the live
-                lookup fails.
+            <div className="rounded-lg border border-line bg-panel p-5">
+              <DownloadButtons release={release} loading={loading} />
+              <p className="mt-4 text-sm leading-6 text-stone-700">
+                The buttons use the public GitHub Releases channel and fall back to the
+                latest-release page if live lookup fails.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="border-b border-white/10 px-5 py-16 sm:px-8">
+      <section className="border-b border-line px-5 py-16 sm:px-8">
         <div className="mx-auto max-w-7xl">
           <p className="section-kicker">Requirements</p>
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             {requirements.map((item) => (
               <article key={item.title} className="feature-card">
-                <item.icon className="h-6 w-6 text-mint" />
-                <h2 className="mt-5 text-lg font-semibold text-white">{item.title}</h2>
-                <p className="mt-3 text-sm leading-6 text-slate-400">{item.body}</p>
+                <item.icon className="h-6 w-6 text-clay" />
+                <h2 className="mt-5 text-lg font-semibold text-charcoal">{item.title}</h2>
+                <p className="mt-3 text-sm leading-6 text-stone-700">{item.body}</p>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="border-b border-white/10 px-5 py-16 sm:px-8">
+      <section className="border-b border-line px-5 py-16 sm:px-8">
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.75fr_1.25fr]">
           <div>
             <p className="section-kicker">Wizard path</p>
             <h2 className="section-title">The setup flow is built into the app.</h2>
             <p className="section-copy">
-              The wizard is meant to get a new free-tier user to a useful first agent without
-              making Supabase sign-in or cloud features mandatory.
+              The wizard helps you connect a provider, choose a project folder, and launch a
+              useful first coding agent without exposing private infrastructure details.
             </p>
           </div>
           <div className="grid gap-4">
             {gettingStartedSteps.map((step, index) => (
               <article key={step.title} className="step-card">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-mint text-ink">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-clay text-paper">
                   <step.icon className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-stone-600">
                     Step {index + 1}
                   </p>
-                  <h3 className="mt-1 text-lg font-semibold text-white">{step.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-400">{step.body}</p>
+                  <h3 className="mt-1 text-lg font-semibold text-charcoal">{step.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-stone-700">{step.body}</p>
                 </div>
               </article>
             ))}
@@ -586,7 +528,7 @@ function GettingStartedPage({
 
       <section className="px-5 py-16 sm:px-8">
         <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[1fr_1fr]">
-          <div className="rounded-lg border border-white/10 bg-panel p-6">
+          <div className="rounded-lg border border-line bg-panel p-6">
             <div className="mb-3 flex items-center gap-2 text-sm font-medium text-amber">
               <ListChecks className="h-4 w-4" />
               Suggested first prompt
@@ -598,9 +540,9 @@ make the change on your branch, run the relevant tests,
 and report what changed plus verification evidence.`}
             </pre>
           </div>
-          <div className="rounded-lg border border-white/10 bg-panel p-6">
-            <h2 className="text-2xl font-semibold text-white">Need the short answers?</h2>
-            <p className="mt-3 text-sm leading-6 text-slate-400">
+          <div className="rounded-lg border border-line bg-panel p-6">
+            <h2 className="text-2xl font-semibold text-charcoal">Need the short answers?</h2>
+            <p className="mt-3 text-sm leading-6 text-stone-700">
               The FAQ covers pricing, keys, platforms, local execution, and what your chosen
               provider can see.
             </p>
@@ -617,36 +559,36 @@ and report what changed plus verification evidence.`}
 
 function FAQPage({
   route,
-  link,
+  release,
   loading,
 }: {
   route: RouteName;
-  link: DownloadLink;
+  release: GitHubRelease | null;
   loading: boolean;
 }) {
   return (
     <>
-      <section id="top" className="border-b border-white/10 px-5 py-16 sm:px-8">
+      <section id="top" className="border-b border-line px-5 py-16 sm:px-8">
         <div className="mx-auto max-w-7xl">
           <p className="section-kicker">FAQ</p>
           <div className="mt-4 grid gap-8 lg:grid-cols-[1fr_0.85fr] lg:items-end">
             <div>
-              <h1 className="max-w-4xl text-5xl font-semibold leading-tight text-white sm:text-6xl">
+              <h1 className="max-w-4xl text-5xl font-semibold leading-tight text-charcoal sm:text-6xl">
                 Short answers before you install.
               </h1>
-              <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-300">
+              <p className="mt-6 max-w-3xl text-lg leading-8 text-stone-800">
                 ZecruAI is a local-first desktop app for coordinating coding agents with the model
                 access you already pay for.
               </p>
             </div>
-            <div className="rounded-lg border border-white/10 bg-panel p-5">
-              <DownloadButtons link={link} loading={loading} />
+            <div className="rounded-lg border border-line bg-panel p-5">
+              <DownloadButtons release={release} loading={loading} />
             </div>
           </div>
         </div>
       </section>
 
-      <section className="border-b border-white/10 px-5 py-16 sm:px-8">
+      <section className="border-b border-line px-5 py-16 sm:px-8">
         <div className="mx-auto grid max-w-7xl gap-4">
           {faqs.map((faq) => (
             <article key={faq.question} className="faq-item">
@@ -660,14 +602,14 @@ function FAQPage({
       <PricingSection />
 
       <section className="px-5 py-16 sm:px-8">
-        <div className="mx-auto max-w-7xl rounded-lg border border-white/10 bg-panel p-6 sm:p-8">
+        <div className="mx-auto max-w-7xl rounded-lg border border-line bg-panel p-6 sm:p-8">
           <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
             <div>
-              <div className="mb-3 flex items-center gap-2 text-sm font-medium text-mint">
+              <div className="mb-3 flex items-center gap-2 text-sm font-medium text-clay">
                 <BookOpenCheck className="h-4 w-4" />
                 First run support
               </div>
-              <h2 className="text-2xl font-semibold text-white sm:text-3xl">
+              <h2 className="text-2xl font-semibold text-charcoal sm:text-3xl">
                 The getting-started guide follows the app's real wizard.
               </h2>
             </div>
@@ -684,11 +626,11 @@ function FAQPage({
 
 function NotFoundPage({
   route,
-  link,
+  release,
   loading,
 }: {
   route: RouteName;
-  link: DownloadLink;
+  release: GitHubRelease | null;
   loading: boolean;
 }) {
   return (
@@ -696,10 +638,10 @@ function NotFoundPage({
       <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_0.8fr] lg:items-center">
         <div>
           <p className="section-kicker">404</p>
-          <h1 className="mt-4 max-w-4xl text-5xl font-semibold leading-tight text-white sm:text-6xl">
+          <h1 className="mt-4 max-w-4xl text-5xl font-semibold leading-tight text-charcoal sm:text-6xl">
             This page is not in the mission plan.
           </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
+          <p className="mt-6 max-w-2xl text-lg leading-8 text-stone-800">
             The ZecruAI site is still small: home, getting started, FAQ, releases, and GitHub.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -713,13 +655,13 @@ function NotFoundPage({
             </a>
           </div>
         </div>
-        <div className="rounded-lg border border-white/10 bg-panel p-6">
-          <h2 className="text-2xl font-semibold text-white">Looking for the app?</h2>
-          <p className="mt-3 text-sm leading-6 text-slate-400">
+        <div className="rounded-lg border border-line bg-panel p-6">
+          <h2 className="text-2xl font-semibold text-charcoal">Looking for the app?</h2>
+          <p className="mt-3 text-sm leading-6 text-stone-700">
             The latest desktop installer is still available from GitHub Releases.
           </p>
           <div className="mt-6">
-            <DownloadButtons link={link} loading={loading} />
+            <DownloadButtons release={release} loading={loading} />
           </div>
         </div>
       </div>
@@ -728,30 +670,31 @@ function NotFoundPage({
 }
 
 function FinalCta({
-  link,
+  release,
   loading,
 }: {
-  link: DownloadLink;
+  release: GitHubRelease | null;
   loading: boolean;
 }) {
   return (
     <section className="px-5 py-16 sm:px-8">
-      <div className="mx-auto max-w-7xl rounded-lg border border-white/10 bg-panel p-6 sm:p-8">
+      <div className="mx-auto max-w-7xl rounded-lg border border-line bg-panel p-6 sm:p-8">
         <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
           <div>
             <div className="mb-3 flex items-center gap-2 text-sm font-medium text-amber">
               <LockKeyhole className="h-4 w-4" />
               Local-first and provider-owned
             </div>
-            <h2 className="text-2xl font-semibold text-white sm:text-3xl">
-              Start with the free desktop app. Keep your model spend where it already is.
+            <h2 className="text-2xl font-semibold text-charcoal sm:text-3xl">
+              Download ZecruAI for Windows or macOS.
             </h2>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400">
-              ZecruAI coordinates agents. It does not resell model access, add analytics, or set
-              cookies in this static site.
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-stone-700">
+              Start from the latest public release. Questions before launch or setup? Email
+              {' '}
+              <a className="text-link" href={`mailto:${contactEmail}`}>{contactEmail}</a>.
             </p>
           </div>
-          <DownloadButtons link={link} loading={loading} />
+          <DownloadButtons release={release} loading={loading} />
         </div>
       </div>
     </section>
@@ -760,8 +703,8 @@ function FinalCta({
 
 function Footer({ route }: { route: RouteName }) {
   return (
-    <footer className="border-t border-white/10 px-5 py-8 sm:px-8">
-      <div className="mx-auto flex max-w-7xl flex-col gap-4 text-sm text-slate-400 md:flex-row md:items-center md:justify-between">
+    <footer className="border-t border-line px-5 py-8 sm:px-8">
+      <div className="mx-auto flex max-w-7xl flex-col gap-4 text-sm text-stone-700 md:flex-row md:items-center md:justify-between">
         <p>ZecruAI</p>
         <div className="flex flex-wrap gap-x-5 gap-y-2">
           <a className="footer-link" href={routeHref(route, 'getting-started')}>
@@ -770,14 +713,11 @@ function Footer({ route }: { route: RouteName }) {
           <a className="footer-link" href={routeHref(route, 'faq')}>
             FAQ
           </a>
-          <a className="footer-link" href={githubRepoUrl}>
-            GitHub
-          </a>
           <a className="footer-link" href={releasesUrl}>
             Releases
           </a>
-          <a className="footer-link" href={licenseUrl}>
-            License
+          <a className="footer-link" href={githubRepoUrl}>
+            Release repo
           </a>
           <a className="footer-link" href={`mailto:${contactEmail}`}>
             Contact
@@ -790,19 +730,19 @@ function Footer({ route }: { route: RouteName }) {
 
 function App({ initialRoute }: { initialRoute?: RouteName }) {
   const route = useMemo(() => initialRoute ?? currentRoute(), [initialRoute]);
-  const { link, loading, fromCache } = useDownloadLink();
+  const { release, loading, fromCache } = useLatestRelease();
 
   return (
-    <main className="min-h-screen overflow-hidden bg-ink text-slate-100">
+    <main className="min-h-screen overflow-hidden bg-cream text-charcoal">
       <Header route={route} />
       {route === 'home' ? (
-        <HomePage route={route} link={link} loading={loading} fromCache={fromCache} />
+        <HomePage route={route} release={release} loading={loading} fromCache={fromCache} />
       ) : route === 'getting-started' ? (
-        <GettingStartedPage route={route} link={link} loading={loading} />
+        <GettingStartedPage route={route} release={release} loading={loading} />
       ) : route === 'faq' ? (
-        <FAQPage route={route} link={link} loading={loading} />
+        <FAQPage route={route} release={release} loading={loading} />
       ) : (
-        <NotFoundPage route={route} link={link} loading={loading} />
+        <NotFoundPage route={route} release={release} loading={loading} />
       )}
       <Footer route={route} />
     </main>
@@ -810,3 +750,4 @@ function App({ initialRoute }: { initialRoute?: RouteName }) {
 }
 
 export default App;
+

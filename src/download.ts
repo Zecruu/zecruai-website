@@ -1,6 +1,6 @@
 export const LATEST_RELEASE_API =
-  'https://api.github.com/repos/Zecruu/ZecruAgentsHive/releases/latest';
-export const LATEST_RELEASE_URL = 'https://github.com/Zecruu/ZecruAgentsHive/releases/latest';
+  'https://api.github.com/repos/Zecruu/ZecruAI-Releases/releases/latest';
+export const LATEST_RELEASE_URL = 'https://github.com/Zecruu/ZecruAI-Releases/releases/latest';
 export const RELEASE_CACHE_KEY = 'zecruai.latestRelease.v1';
 
 export type Platform = 'windows' | 'macos' | 'other';
@@ -58,7 +58,7 @@ export function makeDownloadLink(
   if (asset && platform === 'windows') {
     return {
       platform,
-      label: `Download ZecruAI ${version} for Windows`,
+      label: 'Download for Windows',
       href: asset.browser_download_url,
       version,
       isDirectAsset: true,
@@ -68,14 +68,18 @@ export function makeDownloadLink(
   if (asset && platform === 'macos') {
     return {
       platform,
-      label: `Download ZecruAI ${version} for macOS`,
+      label: 'Download for macOS',
       href: asset.browser_download_url,
       version,
       isDirectAsset: true,
     };
   }
 
-  const label = version ? `View ZecruAI ${version} releases` : 'View latest ZecruAI release';
+  const label = platform === 'macos'
+    ? 'Download for macOS'
+    : platform === 'windows'
+      ? 'Download for Windows'
+      : 'View latest release';
   return {
     platform,
     label,

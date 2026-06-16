@@ -9,7 +9,7 @@ import {
 
 const release: GitHubRelease = {
   tag_name: 'v2.7.0',
-  html_url: 'https://github.com/Zecruu/ZecruAgentsHive/releases/tag/v2.7.0',
+  html_url: 'https://github.com/Zecruu/ZecruAI-Releases/releases/tag/v2.7.0',
   assets: [
     {
       name: 'latest.yml',
@@ -48,10 +48,10 @@ describe('download helpers', () => {
     const windows = makeDownloadLink(release, 'windows');
     const macos = makeDownloadLink(release, 'macos');
 
-    expect(windows.label).toBe('Download ZecruAI 2.7.0 for Windows');
+    expect(windows.label).toBe('Download for Windows');
     expect(windows.href).toContain('.exe');
     expect(windows.isDirectAsset).toBe(true);
-    expect(macos.label).toBe('Download ZecruAI 2.7.0 for macOS');
+    expect(macos.label).toBe('Download for macOS');
     expect(macos.href).toContain('.dmg');
     expect(macos.isDirectAsset).toBe(true);
   });
@@ -59,15 +59,15 @@ describe('download helpers', () => {
   it('falls back to releases when the API or matching asset is unavailable', () => {
     expect(makeDownloadLink(null, 'windows')).toEqual({
       platform: 'windows',
-      label: 'View latest ZecruAI release',
-      href: 'https://github.com/Zecruu/ZecruAgentsHive/releases/latest',
+      label: 'Download for Windows',
+      href: 'https://github.com/Zecruu/ZecruAI-Releases/releases/latest',
       version: undefined,
       isDirectAsset: false,
     });
 
     const linux = makeDownloadLink(release, 'other');
     expect(linux.href).toBe(release.html_url);
-    expect(linux.label).toBe('View ZecruAI 2.7.0 releases');
+    expect(linux.label).toBe('View latest release');
     expect(linux.isDirectAsset).toBe(false);
   });
 });
