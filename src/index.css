@@ -57,6 +57,22 @@ body {
     @apply rounded-md border border-line bg-paper p-6 transition hover:border-clay/40 hover:bg-panelSoft;
   }
 
+  .showcase-card {
+    @apply overflow-hidden rounded-lg border border-line bg-paper shadow-[0_18px_70px_-42px_rgba(70,48,33,0.55)];
+  }
+
+  .showcase-image-shell {
+    @apply relative bg-[#1a1714];
+  }
+
+  .showcase-caption {
+    @apply border-t border-line bg-panel p-5 text-sm leading-6 text-stone-700;
+  }
+
+  .showcase-label {
+    @apply mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-clay;
+  }
+
   .pricing-card {
     @apply rounded-md border border-line bg-paper p-5;
   }

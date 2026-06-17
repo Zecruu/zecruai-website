@@ -346,11 +346,69 @@ function HomePage({
         </div>
       </section>
 
+      <ProductShowcaseSection />
       <FeatureSection />
       <PricingSection />
       <MissionFlowSection route={route} />
       <FinalCta release={release} loading={loading} />
     </>
+  );
+}
+
+function ProductShowcaseSection() {
+  return (
+    <section className="border-b border-line px-5 py-16 sm:px-8">
+      <div className="mx-auto max-w-7xl">
+        <div className="grid gap-6 lg:grid-cols-[0.75fr_1.25fr] lg:items-end">
+          <div>
+            <p className="section-kicker">Product tour</p>
+            <h2 className="section-title">Real setup, real mission control.</h2>
+            <p className="section-copy">
+              ZecruAI brings local agents, CLI setup, planner review, and cloud command-center
+              access into one workspace built for software teams that want visibility.
+            </p>
+          </div>
+          <p className="text-sm leading-6 text-stone-700 lg:max-w-xl lg:justify-self-end">
+            These are live product surfaces from the desktop app. The dashboard image is cropped
+            below the account bar so private account identifiers are not published.
+          </p>
+        </div>
+
+        <div className="mt-10 grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
+          <figure className="showcase-card">
+            <div className="showcase-image-shell aspect-[4/3] sm:aspect-[16/9] lg:aspect-[16/10]">
+              <img
+                src="./screens/zecruai-dashboard-showcase.jpg"
+                alt="ZecruAI desktop dashboard showing the planner mission-control surface and local project workspace."
+                className="h-full w-full object-cover object-left-top"
+                loading="lazy"
+              />
+            </div>
+            <figcaption className="showcase-caption">
+              <span className="showcase-label">Mission control</span>
+              Coordinate planner and coder agents from a desktop workspace, with project status,
+              local tools, and review actions close at hand.
+            </figcaption>
+          </figure>
+
+          <figure className="showcase-card">
+            <div className="showcase-image-shell max-h-[760px] overflow-hidden">
+              <img
+                src="./screens/zecruai-setup-showcase.jpg"
+                alt="ZecruAI setup wizard showing environment checks for Git, Node, npm, Claude, Codex, and deployment CLIs."
+                className="h-auto w-full"
+                loading="lazy"
+              />
+            </div>
+            <figcaption className="showcase-caption">
+              <span className="showcase-label">Guided setup</span>
+              The first-run wizard checks real CLIs and gives clear install or login guidance
+              before you launch an agent.
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
   );
 }
 
