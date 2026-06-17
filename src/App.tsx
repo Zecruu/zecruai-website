@@ -27,6 +27,7 @@ import {
   writeCachedRelease,
   type GitHubRelease,
 } from './download';
+import { rememberTwclid, trackDownload } from './conversion';
 
 export type RouteName = 'home' | 'getting-started' | 'faq' | 'not-found';
 
@@ -176,6 +177,7 @@ function useLatestRelease(): {
 
   useEffect(() => {
     const controller = new AbortController();
+    rememberTwclid(window.location, window.localStorage);
     const cached = readCachedRelease(window.sessionStorage);
     if (cached) {
       setRelease(cached);
@@ -222,11 +224,11 @@ function DownloadButtons({
   const macos = makeDownloadLink(release, 'macos');
   return (
     <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-      <a className="primary-button w-full sm:w-auto" href={windows.href}>
+      <a className="primary-button w-full sm:w-auto" href={windows.href} onClick={() => trackDownload('windows')}>
         <Download className="h-5 w-5" />
         <span>{loading ? 'Checking Windows...' : windows.label}</span>
       </a>
-      <a className="secondary-button w-full sm:w-auto" href={macos.href}>
+      <a className="secondary-button w-full sm:w-auto" href={macos.href} onClick={() => trackDownload('macos')}>
         <Download className="h-5 w-5" />
         <span>{loading ? 'Checking macOS...' : macos.label}</span>
       </a>
